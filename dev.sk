@@ -1,0 +1,101 @@
+on join:
+	send action bar "&b⚝ &7Bienvenue sur &6XeriaLand &7! &b⚝" to player
+	set {PA_CLOUD.%player%} to false
+	
+on weather change to rain or thunder:
+	cancel event
+#-------------------------------CHAT----------------------------------------#
+on chat:
+    cancel event
+    add 1 to {MSG_COUNT.%player%}
+    set "Nombre de message" to "%{MSG_COUNT.%player%} + 0%" in yaml file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
+    set {message.last.%player%} to message
+    set {lastmsgp.%{nbmessagechat}%} to "%player%"
+    set {msgreported.%{nbmessagechat}%} to "%message%"
+    make console execute command "/tellraw @a ["""",{""text"":""&b⚝"",""clickEvent"":{""action"":""run_command"",""value"":""/reportmsg %{lastmsgp.%{nbmessagechat}%}%""},""hoverEvent"":{""action"":""show_text"",""value"":""&bSignalez %player%""}},{""text"":"" %player% &a» &7""},{""text"":""&f%message%""}]"
+    stop
+  
+command /reportmsg [<player>] [<text>]:
+    trigger:
+        arg 1 is set
+        arg 1 is not player
+        set {_reporter} to arg 1
+        set {_report.date} to now
+        if {RC_ID} is not set:
+            set {RC_ID} to 0
+            add 1 to {RC_ID}
+        else:
+            add 1 to {RC_ID}
+            if arg 2 isn't set:
+                if {msgreported.%{nbmessagechat}%} is true:
+                    send "&cErreur: Vous avez déjà  signalé ce message." to player
+                else:
+                    send "&8&m-------------------------------" to player
+                    send " " to player
+                    send "&b⚝ &rVoulez-vous signaler le message de &b%arg 1% &r?" to player
+                    send "&b⚝ &rMesasge: &e%{msgreported.%{nbmessagechat}%}%" to player
+                    send " " to player
+                    make console execute command "/tellraw %player% ["""",{""text"":""          &aOui, signaler %arg 1% !"",""clickEvent"":{""action"":""run_command"",""value"":""/reportmsg %{lastmsgp.%{nbmessagechat}%}% check""},""hoverEvent"":{""action"":""show_text"",""value"":""&b⚝ &eClique pour signaler""}}]"
+                    send "&8&m-------------------------------" to player
+                    
+                    stop
+            if arg 2 is "check":
+                if {msgreported.%{nbmessagechat}%} is true:
+                    send "&cErreur: Vous avez déjà  signalé ce message." to player
+                    stop
+                else:
+                    add "&fLe message de &6%{lastmsgp.%{nbmessagechat}%}%&f: &7&o""%{msgreported.%{nbmessagechat}%}%"" &fa été report par &e%player%" to {reportlist::*}
+                    send "&b⚝ &rMerci pour votre report !" to player
+                    send "&b⚝ &rLe message du joueur sera bientôt vérifié par un modérateur !" to player
+                    set {msgreported.%{nbmessagechat}%} to true
+                    stop
+ 
+command /admreportmsg [<text=help>]:
+    trigger:
+        if arg 1 is "help":
+            send " " to player
+            send "&bRegarder les reports &f> &f&o/admreportmsg see" to player
+            send "&bClear les reports &f> &f&o/admreportmsg clear" to player
+            send " " to player
+        if arg 1 is "see":
+            if size of {reportlist::*} <= 0:
+                send "&cIl n'y a pas de report."
+            else:
+                send "&aIl y a %size of {reportlist::*}% reports." to player
+            set {_number} to 0
+            loop {reportlist::*}:
+                wait a tick
+                add 1 to {_number}
+                send " " to player
+                send  "%{_number}% - %loop-value%" to player
+            send " " to player
+        if arg 1 is "clear":
+            clear {reportlist::*}
+            delete {reportlist::*}
+            send "&aTu as nettoyés la liste des reports &f(&a%size of {reportlist::*}% &freport)" to player
+#----------------------------------------PA et TAB--------------------------------#			
+on join:
+	set tab header to "&6XeriaLand" and footer to "&b⚝ Amuse toi bien sur le serveur ⚝" for player
+		
+command /stop:
+	trigger:
+		stopEffect id "%{TEST.1.%{_p}%}%"
+command /t:	
+	trigger:
+		drawWings style 5, particle1 "redtone", speed 0, RGB 0, 0, 0, particle2 "redstone", speed2 0, RGB2 0, 0, 0, particle3 "redstone", speed3 0, RGB3 245, 122, 0, center player, id "%{TEST.1.%player%}%", isSingle false, player, rainbowMode false, angle 110, height 0, space 0.2, visibleRange 30, tps 1, second 2
+#---------------------------------------YAML-------------------------------------#
+on command:
+	add 1 to {CMD_COUNT.%player%}
+	set "Nombre de commandes" to "%{CMD_COUNT.%player%} + 0%" in yaml file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
+		
+on join:
+	if folder "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%" doesn't exists:
+		create folder "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%"
+		create file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
+		wait 10 ticks
+		set {creation.date.%player%} to now
+		set "Date de creation" to "%{creation.date.%player%}%" in yaml file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
+		set "Pseudo" to "%player%" in yaml file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
+		set "IP" to "%player's ip%" in yaml file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
+		set "Nombre de message" to "%{MSG_COUNT.%player%} + 0%" in yaml file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
+		set "Nombre de commandes" to "%{CMD_COUNT.%player%} + 0%" in yaml file "D:/1.9/plugins/Skript/scripts/YML/Joueurs/%player%/Infos.yml"
